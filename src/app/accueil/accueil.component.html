@@ -1,64 +1,37 @@
-<div>
-  <input [(ngModel)]="urlImage" />
-  <div class="btn" (click)="onClicAjouterImage()">Ajouter une image</div>
-</div>
+<div class="container my-4">
+  <div class="task-list">
+    <div>
+      <input [(ngModel)]="nouvelleTache" placeholder="Ajouter une tâche.." class="task-text" />
+      <button class="btn my-4" (click)="onClicAjouterTache()">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
 
-<div>
-  <input [(ngModel)]="nomCategorie" />
-  <div class="btn" (click)="onClicAjouterCategorie()">
-    Ajouter une catégorie
+    @if (taches.length > 0) {
+      <ul>
+        @for (tache of taches; track $index; let indexTache = $index) {
+          <li>
+            <input type="checkbox" [(ngModel)]="tache.done" (click)="onClicTacheChange(indexTache)" />
+            @if (tache.isEditing) {
+              <input [(ngModel)]="tache.nom" (blur)="onSaveEdit(indexTache, tache.nom)" />
+              <button class="btn annule" (click)="onCancelEdit(indexTache)">
+                <i class="fa-solid fa-arrow-left"></i>
+              </button>
+            } @else {
+              <span>{{ tache.nom }}</span>
+              <button class="btn edit" (click)="onClicEditTache(indexTache)">Edit</button>
+            }
+            <button class="btn supprime ms-2" (click)="onClicSupprimerTache(indexTache)">
+              <i class="fas fa-trash-alt mx-1"></i> 
+            </button>            
+          </li>
+        }
+      </ul>
+    } @else {
+      <p>Aucune tâche</p>
+    }
   </div>
 </div>
 
-<div>
-  <div class="btn" (click)="reset()">Réinitialiser</div>
-</div>
 
-<div class="liste-categories">
-  @for (categorie of categories; track $index; let indexCategorie = $index) {
-    <div class="categorie">
-      <div class="en-tete">
-        <p>{{ categorie.nom }}</p>
-      </div>
-      <div class="contenu">
-        @for (
-          urlImage of categorie.images;
-          track $index;
-          let indexImage = $index
-        ) {
-          <div class="image">
-            <img src="{{ urlImage }}" />
-
-            @if (indexCategorie != 0) {
-              <div
-                class="btn plus"
-                (click)="
-                  onClicChangementCategorie(indexCategorie, indexImage, false)
-                "
-              >
-                +
-              </div>
-            }
-            @if (indexCategorie < categories.length - 1) {
-              <div
-                class="btn moins"
-                (click)="
-                  onClicChangementCategorie(indexCategorie, indexImage, true)
-                "
-              >
-                -
-              </div>
-            }
-
-            <div
-              class="btn supprime"
-              (click)="onClicSupprime(indexCategorie, indexImage)"
-            >
-              X
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  }
-</div>
+<!-- cdn font-awesom type All ajouter à index.html -->

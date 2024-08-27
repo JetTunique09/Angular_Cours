@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -7,97 +6,61 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [FormsModule],
   templateUrl: './accueil.component.html',
-  styleUrl: './accueil.component.scss',
+  styleUrls: ['./accueil.component.scss'],
 })
 export class AccueilComponent {
-  urlImage: string = '';
-  nomCategorie: string = '';
+  nouvelleTache: string = '';
+  taches: { nom: string; done: boolean; isEditing?: boolean }[] = [];
 
-  categories: { nom: string; images: string[] }[] = [];
-
-  http: HttpClient = inject(HttpClient);
-
+  // recuperation des tâches 
   ngOnInit() {
-
-    this.http
-      .get("http://localhost:3000/categories")
-      .subscribe(resultat => console.log(resultat));
-
-    const categoriesSauvegarde = localStorage.getItem('categories');
-
-    if (categoriesSauvegarde == null) {
-      this.reset();
-    } else {
-      this.categories = JSON.parse(categoriesSauvegarde);
+    const tachesSauvegarde = localStorage.getItem('taches');
+    if (tachesSauvegarde) {
+      this.taches = JSON.parse(tachesSauvegarde);
     }
   }
 
-  onClicAjouterImage() {
-    this.categories[0].images.push(this.urlImage);
-    this.urlImage = '';
-    this.sauvegarde();
-  }
-
-  onClicAjouterCategorie() {
-    if (this.nomCategorie != '') {
-      this.categories.push({ nom: this.nomCategorie, images: [] });
-      this.nomCategorie = '';
+  // ajout nouvelle tâche
+  onClicAjouterTache() {
+    if (this.nouvelleTache.trim() !== '') {
+      this.taches.push({ nom: this.nouvelleTache, done: false, isEditing: false });
+      this.nouvelleTache = '';
       this.sauvegarde();
     }
   }
 
-  reset() {
-    this.categories = [
-      {
-        nom: 'tres bien',
-        images: [],
-      },
-      {
-        nom: 'bien',
-        images: [],
-      },
-      {
-        nom: 'moyen',
-        images: [],
-      },
-      {
-        nom: 'bof',
-        images: [],
-      },
-      {
-        nom: 'nul',
-        images: [],
-      },
-    ];
-
+  // suppression tâche 
+  onClicSupprimerTache(index: number) {
+    this.taches.splice(index, 1);
     this.sauvegarde();
   }
 
+  //changement état 
+  onClicTacheChange(index: number) {
+    this.taches[index].done = !this.taches[index].done;
+    this.sauvegarde();
+  }
+
+  // modification tâche
+  onClicEditTache(index: number) {
+    this.taches[index].isEditing = true;
+  }
+
+  // enregistrer modif 
+  onSaveEdit(index: number, newNom: string) {
+    this.taches[index].nom = newNom.trim();
+    this.taches[index].isEditing = false;
+    this.sauvegarde();
+  }
+
+  // retour 
+  onCancelEdit(index: number) {
+    this.taches[index].isEditing = false;
+  }
+
+  // enregistrement dans le local Storage
   sauvegarde() {
-    localStorage.setItem('categories', JSON.stringify(this.categories));
-  }
-
-  onClicChangementCategorie(
-    indexCategorie: number,
-    indexImage: number,
-    moins: boolean,
-  ) {
-    //on récupère l'url de l'image cliquée
-    const urlImage = this.categories[indexCategorie].images[indexImage];
-
-    //on ajoute l'image dans la catégorie inférieure si moins = true, et supérieure si moins = false
-    this.categories[indexCategorie + (moins ? 1 : -1)].images.push(urlImage);
-
-    //on supprime l'image de la catégorie actuelle
-    this.categories[indexCategorie].images.splice(indexImage, 1);
-
-    this.sauvegarde();
-  }
-
-  onClicSupprime(indexCategorie: number, indexImage: number) {
-    //on supprime l'image de la catégorie actuelle
-    this.categories[indexCategorie].images.splice(indexImage, 1);
-
-    this.sauvegarde();
+    localStorage.setItem('taches', JSON.stringify(this.taches));
+    console.log('Tâches sauvegardées:', this.taches); 
   }
 }
